@@ -1,0 +1,32 @@
+
+
+article {
+    font-size: 16px
+}
+
+
+.uk-logo  #circ1 {
+  fill: transparent;
+  color: transparent;
+}
+.uk-logo:hover  #circ1 {
+  -webkit-transition: all 1s ease-in-out;
+  transition: all 1s ease-in-out;
+  fill: #666;
+}
+svg.uk-logo {
+    height: 60px;
+    width: auto;
+}
+body {
+    overflow-y: scroll;
+}
+
+
+input[type="number"] {
+    font-weight:500;
+}
+
+.uk-form-label {
+    font-weight: bold;
+}

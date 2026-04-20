@@ -1,0 +1,42 @@
+{
+  "name":           "KeeForm",
+  "description":    "KeeForm - A simple KeePass form filler",
+  "version":        "5.0.0",
+  "manifest_version": 2,
+  "background": {
+    "scripts": ["keeformext.js"],
+    "persistent": false
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "keeform@keeform.org",
+      "data_collection_permissions": {
+        "required": ["none"]
+      },
+      "strict_min_version": "142.0"
+    }
+  },
+  "web_accessible_resources": ["icons/icon19o.png", "icons/icon19o.png", "icons/tile96.png"],
+  "browser_action": {
+    "default_icon": {
+      "19": "icons/icon19.png",
+      "38": "icons/icon38.png"
+    },
+    "default_title": "KeeForm"
+  },
+  "icons": {
+     "16": "icons/icon16.png",
+     "48": "icons/icon48.png",
+     "64": "icons/icon64.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions":  [
+                    "webRequest", "webRequestAuthProvider", "webRequestBlocking", "storage", "contextMenus"
+                  , "tabs", "<all_urls>", "notifications"
+                  , "nativeMessaging", "webNavigation"
+                  ],
+  "options_ui":{
+    "open_in_tab": true,
+    "page": "options/options.html"
+  }
+}

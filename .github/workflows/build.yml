@@ -1,0 +1,135 @@
+name: Build
+
+on:
+  push:
+#    branches: [ main ]
+    tags:     [ 'v*' ]
+  pull_request:
+#    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v5.0.0-beta2)'
+        required: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    name: Build and lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: host/go.mod
+          cache-dependency-path: |
+            host/go.sum
+            launcher/go.sum
+
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+      - name: Build and lint host
+        working-directory: host
+        run: make all
+
+      - name: Build and lint launcher
+        working-directory: launcher
+        run: make all
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: keeform-binaries
+          path: |
+            host/build_debug/keeform_host.exe
+            host/build_release/keeform_host.exe
+            host/build_release/keeform_host32.exe
+            launcher/build_debug/keeform_launcher.exe
+            launcher/build_release/keeform_launcher.exe
+            launcher/build_release/keeform_launcher32.exe
+          retention-days: 30
+
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "tag=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: keeform-binaries
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: KeeForm ${{ steps.version.outputs.tag }}
+          body: |
+            ## KeeForm ${{ steps.version.outputs.tag }}
+
+            ### Installation
+            Download the installer from the [KeeForm website](https://keeform.org).
+
+            ### Files
+            | File | Description |
+            |------|-------------|
+            | `keeform_host.exe` | Native messaging host (64-bit) |
+            | `keeform_host32.exe` | Native messaging host (32-bit) |
+            | `keeform_launcher.exe` | KeePass launcher (64-bit) |
+            | `keeform_launcher32.exe` | KeePass launcher (32-bit) |
+
+            ### Support files (logging enabled — for diagnostics with DebugView++)
+            | File | Description |
+            |------|-------------|
+            | `keeform_host.exe` (debug) | Native messaging host with logging |
+            | `keeform_launcher.exe` (debug) | KeePass launcher with logging |
+
+            ### Changes
+            <!-- Add release notes here -->
+          files: |
+            host/build_debug/keeform_host.exe
+            host/build_release/keeform_host.exe
+            host/build_release/keeform_host32.exe
+            launcher/build_debug/keeform_launcher.exe
+            launcher/build_release/keeform_launcher.exe
+            launcher/build_release/keeform_launcher32.exe
+
+      - name: Trigger installer build
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.INSTALLER_REPO_TOKEN }}
+          repository: keeform/installer
+          event-type: build-installer
+          client-payload: |
+            {
+              "version": "${{ steps.version.outputs.tag }}",
+              "run_id": "${{ github.run_id }}"
+            }
+
+      - name: Trigger pages deploy
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.INSTALLER_REPO_TOKEN }}
+          repository: keeform/pages
+          event-type: new-release

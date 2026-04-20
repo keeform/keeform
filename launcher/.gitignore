@@ -1,0 +1,6 @@
+/build_debug/
+/build_release/
+/keeform_launcher.exe
+/keeform_launcher32.exe
+/lint
+*.log

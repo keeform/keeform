@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>KeeForm</title>
+  <meta charset="UTF-8">
+  <link href="uikit/css/uikit-core.min.css" rel="stylesheet">
+  <link href="options.css" rel="stylesheet">
+  <script src="uikit/js/uikit-core.min.js"></script>
+  <script src="uikit/js/components/notification.min.js"></script>
+  <script src="options.js" defer></script>
+</head>
+
+<body class="tm-background">
+  <div class="tm-middle">
+    <div class="uk-container uk-container-center">
+      <div class="uk-grid">
+        <div class="uk-width-1-2">
+          <article class="uk-article uk-width-1-1 uk-width-large-4-5 uk-width-medium-6-7 uk-width-small-9-10">
+            <div class="uk-grid uk-animation-slide-bottom" data-uk-margin="{cls:'uk-margin-top'}">
+              <div class="uk-width-1-1">
+                <div class="uk-flex uk-flex-middle">
+                  <img class="uk-logo uk-animation-scale-up uk-margin-right" src="kf_text2_plain.svg" uk-svg
+                    title="KeeForm" alt="KeeForm">
+                  <ul class="uk-subnav uk-subnav-pill" uk-switcher=".uk-switcher">
+                    <li class="uk-active">
+                      <a href="#">Settings</a>
+                    </li>
+                    <li>
+                      <a href="#">Documentation</a>
+                    </li>
+                    <li>
+                      <a href="#">Credits</a>
+                    </li>
+                  </ul>
+                </div>
+                <hr>
+                <div class="uk-switcher" id="tab-left-content">
+
+                  <div class="uk-active">
+                    <div class="uk-panel uk-panel-box uk-panel-box-secondary">
+                      <form id="options" class="uk-form uk-form-horizontal">
+
+                          <div class="uk-margin">
+                            <p>You can repeat form filling by clicking on the KeeForm icon. This will be disabled
+                              after a timeout</p>
+                            <label class="uk-form-label" for="repeat">Repeat timeout</label>
+                            <div class="uk-form-controls">
+                              <input class="uk-input" type="number" placeholder id="repeat" size="5" name="repeat" value="30" min="1"
+                                max="600" required> seconds
+                            </div>
+                          </div>
+                          <hr>
+                          <div class="uk-margin">
+                            <p>Follow page activity and redirects until a password is found or timeout</p>
+                            <label class="uk-form-label" for="timeout">Redirect timeout</label>
+                            <div class="uk-form-controls">
+                              <input class="uk-input" type="number" placeholder id="timeout" size="5" name="timeout" value="20" min="1"
+                                max="600" required> seconds
+                            </div>
+                          </div>
+                          <hr>
+                          <div class="uk-margin">
+                            <p>Try form filling found up to x times (useful for "slow forms")</p>
+                            <label class="uk-form-label" for="retry-number">Number of tries</label>
+                            <div class="uk-form-controls">
+                              <input class="uk-input" type="number" placeholder="" id="retry-number" size="3" name="retry-number"
+                                value="4" min="1" max="9" required> times
+                            </div>
+                          </div>
+                          <hr>
+                          <div class="uk-margin">
+                            <label class="uk-form-label" for="retry-delay">Delay between tries</label>
+                            <div class="uk-form-controls">
+                              <input class="uk-input" type="number" placeholder="" id="retry-delay" size="3" name="retry-delay" value="2"
+                                min="1" max="9" required> seconds
+                            </div>
+                          </div>
+                          <hr>
+                          <div class="uk-margin">
+                            <p>Enable debug logging in the browser console. Useful for diagnosing form filling issues.
+                            </p>
+                            <label class="uk-form-label" for="loglevel">Debug logging</label>
+                            <div class="uk-form-controls">
+                              <input class="uk-checkbox" type="checkbox" id="loglevel" name="loglevel">
+                            </div>
+                          </div>
+                          <hr>
+                          <div class="uk-margin">
+                            <p>Uncheck this to show the KeeForm tips again next time.</p>
+                            <label class="uk-form-label" for="tipshown">Show tips</label>
+                            <div class="uk-form-controls">
+                              <input class="uk-checkbox" type="checkbox" id="tipshown" name="tipshown">
+                            </div>
+                          </div>
+                          <hr>
+
+                          <div id="password-button-group" class="">
+                            <button class="uk-button uk-button-small" type="button" data-action="close">Close</button>
+                            <button id="save" class="uk-button uk-button-large" type="submit"
+                              data-action="save">Save</button>
+                            <button class="uk-button uk-button-small" type="button" data-action="reset">Reset</button>
+                          </div>
+
+                        </form>
+
+                    </div>
+
+                  </div>
+                  <div class="uk-active">
+
+                    <div class="uk-panel uk-panel-box uk-panel-box-secondary uk-width-1-1 uk-container-center">
+                      <div>
+
+                        <div>
+                          <p>KeeForm is an easy-to-use and fast form filler for KeePass. It automatically fills in your
+                            username and password fields with a simple double-click in KeePass.</p>
+
+                          <h3>How form filling works</h3>
+                          <ol>
+                            <li>Start KeePass and double-click on a URL.</li>
+                            <li>KeePass passes the URL, username, and password to KeeForm.</li>
+                            <li>KeeForm opens the URL in the browser.</li>
+                            <li>KeeForm automatically fills in the username and password fields.</li>
+                            <li>You review the filled fields and submit the form yourself.</li>
+                          </ol>
+                          <p>KeeForm uses a smart algorithm that handles standard login forms, forms with hidden
+                            password fields, shadow DOM, and many modern single-page application frameworks.</p>
+
+                          <h3>If form filling does not work</h3>
+                          <p>Some pages load slowly or build their forms dynamically. If the fields were not filled:</p>
+                          <ol>
+                            <li><strong>Click the KeeForm icon</strong> in the browser toolbar to retry. The icon turns
+                              green when a retry is available.</li>
+                            <li><strong>Click into the username or password field first</strong>, then click the KeeForm
+                              icon. Some modern frameworks (React, Angular, Flutter) only initialize their input fields
+                              when the user interacts with them.</li>
+                            <li>For <strong>modal/popup login forms</strong>: open the modal first, then click the
+                              KeeForm icon.</li>
+                            <li>For <strong>two-step logins</strong> (email on one page, password on the next): click
+                              the icon on the password page.</li>
+                          </ol>
+
+                          <h3>Icon meaning</h3>
+                          <ul>
+                            <li><strong>Green badge</strong> — KeeForm is connected to KeePass and ready.</li>
+                            <li><strong>Red badge</strong> — KeeForm cannot connect. Check that the KeeForm Windows
+                              application is running and not blocked by antivirus.</li>
+                            <li><strong>Green icon</strong> (tab) — A retry is available. Click to retry form filling.
+                            </li>
+                          </ul>
+
+                          <h3>Installation</h3>
+                          <ol>
+                            <li>Download the KeeForm Windows application from <a
+                                href="https://keeform.org/keepass/keeform-for-chrome">keeform.org</a> and follow the
+                              guided steps.</li>
+                            <li>Install this browser extension from the <a
+                                href="https://keeform.org/keepass/keeform-for-chrome">KeeForm website</a>.</li>
+                          </ol>
+
+                          <h3>Privacy</h3>
+                          <p>KeeForm never has access to your KeePass database. It only receives the username and
+                            password for the specific entry you double-clicked, uses it to fill the form, and discards
+                            it. No data is stored or transmitted externally.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                  <div class="uk-active">
+
+                    <div class="uk-panel uk-panel-box uk-panel-box-secondary uk-width-1-1 uk-container-center">
+                      <div>
+
+                        <div>
+                          <h3>A big thanks to the following projects</h3>
+                          <ul>
+                            <li>KeePass</li>
+                            <li>AutoIt</li>
+                            <li>AutoIt Encryption and JSON libraries (Ward, Matthew)</li>
+                            <li>Golang</li>
+                            <li>Javascript</li>
+                            <li>jQuery</li>
+                            <li>jQuery-parseData</li>
+                            <li>UIkit</li>
+                            <li>Yootheme Pro</li>
+                            <li>Bluebird</li>
+                            <li>Underscore</li>
+                            <li>Marked</li>
+                            <li>KeePass Icons (Ruslan Kadamov, Zachary Hudock)</li>
+                            <li>Font Awesome 5 SVG icons</li>
+                            <li>Inno Setup</li>
+                            <li>Unsplash images</li>
+                            <li>Browser pass native.pl — a perl client for testing native messaging</li>
+                          </ul>
+                          <p>KeeForm wouldn't be possible without these awesome open source projects.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

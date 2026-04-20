@@ -1,0 +1,8 @@
+/build_debug/
+/build_release/
+/keeform_host.exe
+/keeform_host32.exe
+/.vscode
+/*.bak
+/lint
+*.log

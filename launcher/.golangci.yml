@@ -1,0 +1,68 @@
+run:
+  build-tags:
+    - windows
+
+linters:
+  enable:
+    - errname       # errors are named correctly
+    - errorlint     # errors not wrapped for 1.13
+    - gofmt         # files are gofmt'ed
+    - gosec         # security
+    - nilerr        # returns nil even with non-nil error
+    - revive        # golint replacement
+    - unconvert     # unnecessary conversions
+    - unparam       # unused function params
+    - wastedassign  # wasted assignments
+
+issues:
+  exclude-rules:
+    # err is very often shadowed in nested scopes
+    - linters:
+        - govet
+      text: '^shadow: declaration of "err" shadows declaration'
+
+    # allow unjustified nolint in defer statements
+    - linters:
+        - nolintlint
+      text: "^directive `//nolint:errcheck` should provide explanation"
+      source: '^\s*defer '
+
+linters-settings:
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment  # struct field order is sometimes dictated by Win32 ABI
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+  revive:
+    enable-all-rules: true
+    rules:
+      - name: empty-lines
+        disabled: true
+      - name: add-constant       # too noisy — many legitimate string literals
+        disabled: true
+      - name: flag-parameter     # initLogging(debug bool) is a legitimate initializer
+        disabled: true
+      - name: cognitive-complexity
+        disabled: true
+      - name: cyclomatic
+        disabled: true
+      - name: deep-exit          # we use os.Exit intentionally on fatal errors
+        disabled: true
+      - name: file-header        # we have our own header style
+        disabled: true
+      - name: function-length
+        disabled: true
+      - name: unhandled-error    # covered by errcheck linter instead
+        disabled: true
+      - name: unnecessary-stmt   # single-case switch is used as a TODO placeholder
+        disabled: true
+      - name: line-length-limit
+        arguments:
+          - 180
+      - name: var-naming
+        arguments:
+          - []
+          - - API
+            - DPAPI
