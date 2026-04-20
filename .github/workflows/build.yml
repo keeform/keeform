@@ -48,10 +48,8 @@ jobs:
         with:
           name: keeform-binaries
           path: |
-            host/build_debug/keeform_host.exe
             host/build_release/keeform_host.exe
             host/build_release/keeform_host32.exe
-            launcher/build_debug/keeform_launcher.exe
             launcher/build_release/keeform_launcher.exe
             launcher/build_release/keeform_launcher32.exe
           retention-days: 30
@@ -99,19 +97,11 @@ jobs:
             | `keeform_launcher.exe` | KeePass launcher (64-bit) |
             | `keeform_launcher32.exe` | KeePass launcher (32-bit) |
 
-            ### Support files (logging enabled — for diagnostics with DebugView++)
-            | File | Description |
-            |------|-------------|
-            | `keeform_host.exe` (debug) | Native messaging host with logging |
-            | `keeform_launcher.exe` (debug) | KeePass launcher with logging |
-
             ### Changes
             <!-- Add release notes here -->
           files: |
-            host/build_debug/keeform_host.exe
             host/build_release/keeform_host.exe
             host/build_release/keeform_host32.exe
-            launcher/build_debug/keeform_launcher.exe
             launcher/build_release/keeform_launcher.exe
             launcher/build_release/keeform_launcher32.exe
 
