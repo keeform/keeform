@@ -80,7 +80,9 @@ func dpAPIEncryptDataFile(plaintext []byte) ([]byte, error) {
 // decryptPassword handles {PASSWORD_ENC} / plain text password.
 // KeePass {PASSWORD_ENC} = base64(DPAPI(password, keepassEntropy)).
 // If base64 decode fails → plain text {PASSWORD}.
-// If DPAPI decrypt fails → abort (don't forward garbled base64 as password).
+// If DPAPI decrypt fails → fallback to plain text for backward compatibility.
+// NOTE: This preserves historical behavior but means a base64-looking plain
+// password is accepted as plain text when DPAPI decrypt is not possible.
 func decryptPassword(input string) (string, error) {
 	logEnter("decryptPassword")          // debug
 	defer logLeave("decryptPassword")    // debug
@@ -108,8 +110,10 @@ func decryptPassword(input string) (string, error) {
 	)
 
 	if ret == 0 {
-		return "", fmt.Errorf("DPAPI decrypt failed — password may be from different user/machine: %w", err)
+		logf("DPAPI decrypt failed, treating as plain text password: %v", err) // debug
+		return input, nil
 	}
+
 	defer func() {
 		_, _ = windows.LocalFree(windows.Handle(unsafe.Pointer(output.pbData)))
 	}()
