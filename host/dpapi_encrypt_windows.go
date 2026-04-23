@@ -99,7 +99,7 @@ func decryptPassword(input string) (string, error) {
 	entropy := newDataBlob(keepassEntropy)
 	var output dataBlob
 
-	ret, _, err := procCryptUnprotectData.Call(
+	ret, _, _ := procCryptUnprotectData.Call(
 		uintptr(unsafe.Pointer(input2)),
 		0,
 		uintptr(unsafe.Pointer(entropy)),
@@ -110,7 +110,7 @@ func decryptPassword(input string) (string, error) {
 	)
 
 	if ret == 0 {
-		logf("DPAPI decrypt failed, treating as plain text password: %v", err) // debug
+		logf("DPAPI decrypt failed, treating as plain text password") // debug
 		return input, nil
 	}
 
