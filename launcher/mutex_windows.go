@@ -12,7 +12,7 @@ import (
 
 const (
 	mutexName    = "KeeFormLauncherMutex"
-	mutexTimeout = 30 * time.Second
+	mutexTimeout = 60 * time.Second
 )
 
 // acquireMutex ensures only one launcher runs at a time.
@@ -47,7 +47,12 @@ func acquireMutex() {
 	case windows.WAIT_OBJECT_0, windows.WAIT_ABANDONED:
 		logf("mutex acquired") // debug
 	case uint32(windows.WAIT_TIMEOUT):
-		logf("mutex timeout after %v — proceeding anyway", mutexTimeout) // debug
+		logf("mutex timeout after %v — aborting", mutexTimeout) // debug
+		showError(
+			"KeeForm busy",
+			"Another KeeForm login is still in progress.\n\nPlease wait a moment and try again.",
+		)
+		os.Exit(1)
 	default:
 		logf("unexpected WaitForSingleObject event: %d", event) // debug
 		os.Exit(1)
