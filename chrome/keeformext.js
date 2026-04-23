@@ -421,23 +421,25 @@ chrome.action.onClicked.addListener(function(tab) {
     })(loginTab.id, loginTab.login)
 })
 
-keeform.onAuthRequired = function(details) {
+keeform.onAuthRequired = function(details, asyncCallback) {
     var loginTab = keeform.loginTabs.find(t => t.id === details.tabId)
     if (loginTab === undefined) {
         debug.log(padIds(details.tabId), 'onAuthRequired: did not find login data')
+        asyncCallback({})
         return
     }
     if (!loginTab.login) {
         debug.log(padIds(details.tabId), 'onAuthRequired: login data empty')
+        asyncCallback({})
         return
     }
     debug.log(padIds(details.tabId), 'Send authCredentials')
-    return {
+    asyncCallback({
         authCredentials: {
             username: loginTab.login.username,
             password: loginTab.login.password
         }
-    }
+    })
 }
 
 chrome.webRequest.onAuthRequired.addListener(keeform.onAuthRequired, {urls: ['<all_urls>']}, ['asyncBlocking'])
