@@ -113,20 +113,43 @@ keeform.versionOk = function(version, minimum) {
     return true
 }
 
-keeform.showVersionWarning = function(hostVersion) {
+keeform.showVersionError = function(hostVersion) {
     debug.warn('host version too old:', hostVersion, '< required:', MIN_HOST_VERSION)
+    versionErrored = true
     keeform.badgeColor = [255, 29, 29, 220]
     chrome.action.setBadgeBackgroundColor({color: keeform.badgeColor})
     chrome.action.setBadgeText({text: ' '})
-    chrome.notifications.create('keeform-version-' + Date.now(), {
-        type:     "basic",
-        title:    "KeeForm — update required",
-        message:  "Your KeeForm Windows application (v" + hostVersion + ") is too old.\n" +
-                  "Please download the latest version from keeform.org.\n" +
-                  "Required: v" + MIN_HOST_VERSION,
-        iconUrl:  "icons/error96.png",
-        priority: 2
-    }, function() {})
+    chrome.tabs.create({url: chrome.runtime.getURL('error.html') + '?host=' + encodeURIComponent(hostVersion) + '&required=' + encodeURIComponent(MIN_HOST_VERSION)})
+}
+
+// #endregion
+
+// track connection state for tab decisions
+var everConnected  = false
+var versionErrored = false
+
+keeform.showGetStarted = function() {
+    debug.info('no host, opening getstarted tab')
+    chrome.tabs.create({url: chrome.runtime.getURL('getstarted.html')})
+}
+
+// #region what's new
+
+keeform.checkWhatsNew = function() {
+    fetch(chrome.runtime.getURL('whatsnew.html'))
+        .then(function(r) { return r.text() })
+        .then(function(html) {
+            var hash = Array.from(new TextEncoder().encode(html))
+                .reduce(function(h, b) { return (Math.imul(31, h) + b) | 0 }, 0)
+                .toString(36)
+            chrome.storage.local.get({lastSeenNewsHash: ''}, function(items) {
+                if (items.lastSeenNewsHash !== hash) {
+                    debug.info('whatsnew hash changed, opening tab')
+                    chrome.tabs.create({url: chrome.runtime.getURL('whatsnew.html')})
+                }
+            })
+        })
+        .catch(function(e) { debug.warn('checkWhatsNew error', e) })
 }
 
 // #endregion
@@ -330,44 +353,10 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         sendResponse({tcpNeeded: false})
         return
     }
-    // Tip overlay messages
-    if (message.action === 'checkTip') {
-        chrome.storage.local.get({tipShown: false}, function(items) {
-            sendResponse({showTip: !items.tipShown})
-        })
-        return true
-    }
 
-    if (message.action === 'pauseRepeat') {
-        if (sender.tab) {
-            var idx = keeform.loginTabs.findIndex(t => t.id === sender.tab.id)
-            if (idx !== -1 && keeform.loginTabs[idx].repeatTimer) {
-                clearTimeout(keeform.loginTabs[idx].repeatTimer)
-                keeform.loginTabs[idx].repeatTimer = null
-                debug.log(padIds(sender.tab.id), 'repeat timer paused for tip')
-            }
-        }
-        return
-    }
-
-    if (message.action === 'dismissTip') {
-        if (message.permanent) {
-            chrome.storage.local.set({tipShown: true})
-            debug.log('tip permanently dismissed')
-        }
-        if (sender.tab) {
-            var idx = keeform.loginTabs.findIndex(t => t.id === sender.tab.id)
-            if (idx !== -1 && keeform.loginTabs[idx].login) {
-                var tabId = sender.tab.id
-                keeform.loginTabs[idx].repeatTimer = setTimeout(function() {
-                    debug.log(padIds(tabId), 'repeat timeout (resumed after tip)')
-                    var i = keeform.loginTabs.findIndex(t => t.id === tabId)
-                    if (i !== -1) { keeform.loginTabs[i].login = ''; keeform.loginTabs[i].repeatTimer = null }
-                    keeform.resetIcon(tabId)
-                }, keeform.settings.repeat)
-                debug.log(padIds(tabId), 'repeat timer resumed after tip dismiss')
-            }
-        }
+    if (message.action === 'saveNewsHash') {
+        chrome.storage.local.set({lastSeenNewsHash: message.hash})
+        debug.log('news hash saved')
         return
     }
 
@@ -444,6 +433,10 @@ keeform.onAuthRequired = function(details, asyncCallback) {
 
 chrome.webRequest.onAuthRequired.addListener(keeform.onAuthRequired, {urls: ['<all_urls>']}, ['asyncBlocking'])
 
+chrome.runtime.onInstalled.addListener(function(details) {
+    console.info('onInstalled', details.reason)
+})
+
 chrome.runtime.onStartup.addListener(function() {
     console.info('onStartup')
 })
@@ -484,6 +477,10 @@ port.onMessage.addListener(function(msg) {
         keeform.badgeColor = [0, 200, 83, 200]
         chrome.action.setBadgeBackgroundColor({color: keeform.badgeColor})
         chrome.action.setBadgeText({text: ' '})
+        if (!everConnected) {
+            everConnected = true
+            chrome.storage.local.set({everConnected: true})
+        }
         return true
     }
 
@@ -498,10 +495,12 @@ port.onMessage.addListener(function(msg) {
     if (typeof msg.version === 'string') {
         debug.info('host version', msg.version)
         if (!keeform.versionOk(msg.version, MIN_HOST_VERSION)) {
-            keeform.showVersionWarning(msg.version)
+            keeform.showVersionError(msg.version)
+            port.disconnect()
             return
         }
         debug.info('host version ok')
+        keeform.checkWhatsNew()
         return
     }
 
@@ -525,6 +524,13 @@ port.onDisconnect.addListener(function() {
     chrome.action.setBadgeBackgroundColor({color: keeform.badgeColor})
     chrome.action.setBadgeText({text: ' '})
     port = null
+    if (!versionErrored && !everConnected) {
+        chrome.storage.local.get({everConnected: false}, function(items) {
+            if (!items.everConnected) {
+                keeform.showGetStarted()
+            }
+        })
+    }
 })
 
 // #endregion

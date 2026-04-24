@@ -398,72 +398,6 @@ var findForm = function(request) {
 
 // #endregion
 
-// #region tip overlay
-
-var keeformTipShown = false  // per-session flag, prevent showing twice
-
-var showTip = function() {
-    if (keeformTipShown) return
-    if (window.top !== window.self) return  // main frame only
-
-    chrome.runtime.sendMessage({action: 'checkTip'}, function(response) {
-        if (!response || !response.showTip) return
-        keeformTipShown = true
-
-        // Pause repeat timeout while tip is visible
-        chrome.runtime.sendMessage({action: 'pauseRepeat'})
-
-        var overlay = document.createElement('div')
-        overlay.id = 'keeform-tip'
-        var iconUrl = chrome.runtime.getURL('icons/icon19o.png')
-        var tileUrl = chrome.runtime.getURL('icons/tile96.png')
-        overlay.innerHTML =
-            '<div id="keeform-tip-box">' +
-            '  <div id="keeform-tip-header">' +
-            '    <img src="' + tileUrl + '" width="48" height="48" id="keeform-tip-logo">' +
-            '    <span id="keeform-tip-title">KeeForm tips</span>' +
-            '  </div>' +
-            '  <ul id="keeform-tip-list">' +
-            '    <li>If fields were not filled, click the <img src="' + iconUrl + '" width="16" height="16" style="vertical-align:middle"> <strong>orange icon</strong> to retry — while it is orange.</li>' +
-            '    <li>For <strong>two-step logins</strong> (email first, then password): click the orange icon again on the password page.</li>' +
-            '    <li>For <strong>modal/popup forms</strong>: open the modal first, then click the orange icon.</li>' +
-            '    <li>For <strong>stubborn forms</strong>: click into the username or password field first, then click the orange icon.</li>' +
-            '    <li>When the icon turns blue, login data is erased and retry is no longer available.</li>' +
-            '  </ul>' +
-            '  <div id="keeform-tip-footer">' +
-            '    <label id="keeform-tip-label"><input type="checkbox" id="keeform-tip-dontshow"> Do not show again</label>' +
-            '    <button id="keeform-tip-close">Got it</button>' +
-            '  </div>' +
-            '</div>'
-
-        var style = document.createElement('style')
-        style.textContent =
-            '#keeform-tip { all:initial; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2147483647; }' +
-            '#keeform-tip-box { all:initial; display:block; box-sizing:border-box; background:#1c62d3; border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,0.3); padding:20px 24px; min-width:300px; max-width:600px; width:50vw; font-family:Arial,sans-serif; font-size:14px; color:#fff; }' +
-            '#keeform-tip-header { display:flex; align-items:center; gap:14px; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.2); }' +
-            '#keeform-tip-logo { display:block; flex-shrink:0; }' +
-            '#keeform-tip-title { font-family:Arial,sans-serif; font-size:18px; font-weight:bold; color:#fff; }' +
-            '#keeform-tip-list { margin:0 0 16px 0; padding-left:20px; line-height:1.8; color:#e8e8e8; font-family:Arial,sans-serif; font-size:14px; }' +
-            '#keeform-tip-list li { margin-bottom:6px; }' +
-            '#keeform-tip-list strong { color:#fff; }' +
-            '#keeform-tip-footer { display:flex; align-items:center; justify-content:space-between; margin-top:4px; }' +
-            '#keeform-tip-label { font-family:Arial,sans-serif; font-size:13px; color:#c8d8f8; cursor:pointer; display:flex; align-items:center; gap:8px; }' +
-            '#keeform-tip-close { font-family:Arial,sans-serif; font-size:14px; font-weight:bold; line-height:1; background:#fff; color:#1c62d3; border:none; border-radius:6px; padding:8px 18px; cursor:pointer; }'
-
-        document.head.appendChild(style)
-        document.body.appendChild(overlay)
-
-        document.getElementById('keeform-tip-close').addEventListener('click', function() {
-            var permanent = document.getElementById('keeform-tip-dontshow').checked
-            chrome.runtime.sendMessage({action: 'dismissTip', permanent: permanent})
-            overlay.remove()
-            style.remove()
-        })
-    })
-}
-
-// #endregion
-
 // #region message handler
 
 chrome.runtime.onMessage.addListener(async function keeformContent(request, sender, sendResponse) {
@@ -515,9 +449,6 @@ chrome.runtime.onMessage.addListener(async function keeformContent(request, send
             break
         }
     }
-
-    // Show first-run tip on main frame
-    if (window.top === window.self) showTip()
 
     debug.info(padIds(request), 'finished onMessage')
     chrome.runtime.sendMessage({status: "finished", reason: "end of script", filled: result, tabId: request.tabId, frameId: request.frameId})

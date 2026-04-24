@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KeeForm — Update required</title>
+  <link rel="icon" href="icons/icon48.png" sizes="48x48">
+  <link rel="stylesheet" href="keeform-pages.css">
+</head>
+<body>
+  <div class="trust-banner">
+    Security advice: Confirm that you see a button with a puzzle piece icon labeled "KeeForm" in your address bar before downloading and installing anything.</div>
+  <div class="wrap">
+    <h1 class="h1-error">KeeForm update required</h1>
+    <p>KeeForm cannot continue until the Windows host application is updated. After installing, restart the browser to reconnect.</p>
+    <p id="extensionInfo"></p>
+    <div class="meta" id="versionMeta"></div>
+
+    <div class="actions">
+      <a id="downloadBtn" class="btn btn-primary" href="https://keeform.github.io/pages/download" target="_blank" rel="noopener noreferrer">Download the KeeForm Windows installer</a>
+    </div>
+
+    <hr style="margin: 24px 0; border: none; border-top: 1px solid #dce3ff;">
+
+    <h2>What's in this update</h2>
+    <ul>
+      <li>Complete rewrite of the launcher and Windows host application.</li>
+      <li>AutoIt launcher replaced by a native Go application — faster, smaller, no runtime dependency.</li>
+      <li>DPAPI encryption used for the data file.</li>
+      <li>Minimum extension version check added to the host.</li>
+      <li>32-bit and 64-bit versions included.</li>
+      <li>KeePass folder pre-filled when installed in a standard location.</li>
+      <li>Silent/automated installation support.</li>
+      <li>Automatically installs the correct version for your Windows.</li>
+    </ul>
+  </div>
+  <script src="error.js"></script>
+</body>
+</html>
