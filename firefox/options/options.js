@@ -7,27 +7,51 @@ document.addEventListener('DOMContentLoaded', function() {
     var timeout     = document.getElementById('timeout')
     var repeat      = document.getElementById('repeat')
     var loglevel    = document.getElementById('loglevel')
-    var tipshown    = document.getElementById('tipshown')
+
+    // ── Tab switcher ──
+    var tabs   = document.querySelectorAll('.kf-tabs li')
+    var panels = document.querySelectorAll('.kf-tab-panel')
+
+    document.getElementById('kf-tabs').addEventListener('click', function(e) {
+        var link = e.target.closest('a[data-tab]')
+        if (!link) return
+        e.preventDefault()
+        var target = link.dataset.tab
+        tabs.forEach(function(li) { li.classList.remove('active') })
+        panels.forEach(function(p) { p.classList.remove('active') })
+        link.parentElement.classList.add('active')
+        document.getElementById('tab-' + target).classList.add('active')
+    })
+
+    // ── Toast ──
+    var toastEl = document.getElementById('kf-toast')
+    var toastTimer = null
+    function showToast(msg) {
+        toastEl.textContent = msg
+        toastEl.classList.add('show')
+        clearTimeout(toastTimer)
+        toastTimer = setTimeout(function() { toastEl.classList.remove('show') }, 2000)
+    }
+
+    // ── What's new ──
+    document.getElementById('whatsnew').addEventListener('click', function() {
+        chrome.storage.local.remove('lastSeenNewsHash', function() {
+            chrome.tabs.create({url: chrome.runtime.getURL('whatsnew.html')})
+        })
+    })
 
     loadOptions()
 
-    document.getElementById('password-button-group').addEventListener('click', function(e) {
-        var action = e.target.dataset.action
-        if (!action) return
+    // ── Form actions ──
+    document.getElementById('options').addEventListener('submit', function(e) {
+        e.preventDefault()
+        saveOptions()
+    })
 
-        if (action === 'close') {
-            closeOptions()
-        } else if (action === 'save') {
-            if (!document.getElementById('options').checkValidity()) {
-                document.getElementById('save').click()
-                return
-            }
-            e.target.blur()
-            e.preventDefault()
-            saveOptions()
-        } else if (action === 'reset') {
-            resetOptions()
-        }
+    document.getElementById('options').addEventListener('click', function(e) {
+        var action = e.target.dataset.action
+        if (action === 'close') closeOptions()
+        if (action === 'reset') resetOptions()
     })
 
     function saveOptions() {
@@ -36,14 +60,9 @@ document.addEventListener('DOMContentLoaded', function() {
             retrynumber: retrynumber.value,
             timeout:     timeout.value,
             repeat:      repeat.value,
-            loglevel:    loglevel.checked ? 5 : 0,
-            tipShown:    !tipshown.checked
+            loglevel:    loglevel.checked ? 5 : 0
         }, function() {
-            UIkit.notification("<i class='uk-icon-check'></i> Saved options", {
-                timeout: 2000,
-                pos: 'top-center',
-                status: 'success'
-            })
+            showToast('✓ Options saved')
         })
     }
 
@@ -53,21 +72,14 @@ document.addEventListener('DOMContentLoaded', function() {
             retrynumber: '4',
             timeout:     '20',
             repeat:      '30',
-            loglevel:    0,
-            tipShown:    false
+            loglevel:    0
         }, function(items) {
             retrydelay.value  = items.retrydelay
             retrynumber.value = items.retrynumber
             timeout.value     = items.timeout
             repeat.value      = items.repeat
             loglevel.checked  = items.loglevel > 0
-            tipshown.checked  = !items.tipShown
-
-            UIkit.notification("<i class='uk-icon-check'></i> Loaded options", {
-                timeout: 2000,
-                pos: 'top-center',
-                status: 'success'
-            })
+            showToast('✓ Options loaded')
         })
     }
 
@@ -77,7 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
         timeout.value     = '20'
         repeat.value      = '30'
         loglevel.checked  = false
-        tipshown.checked  = true
     }
 
     function closeOptions() {
