@@ -1,7 +1,7 @@
 {
   "name":           "KeeForm",
   "description":    "KeeForm - A simple KeePass form filler",
-  "version":        "5.0.0",
+  "version":        "5.0.1",
   "manifest_version": 2,
   "background": {
     "scripts": ["keeformext.js"],

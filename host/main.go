@@ -42,7 +42,7 @@ import (
 	"time"
 )
 
-const keeformVersion = "5.0.0"
+const keeformVersion = "5.0.1"
 const dataFile = "keeform_host.exe.data"
 
 // browserMsg is received from the browser extension on connect.
