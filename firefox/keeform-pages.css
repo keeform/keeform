@@ -1,0 +1,74 @@
+:root { color-scheme: light; }
+
+html {
+  overflow-y:scroll
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    background: #f6f8ff;
+    color: #1b1f2a;
+}
+
+.trust-banner {
+    background: #0d4fb8;
+    color: #fff;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 700;
+}
+
+.wrap {
+    max-width: 760px;
+    margin: 48px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    padding: 28px;
+}
+
+h1 { margin: 0 0 12px 0; }
+p { line-height: 1.6; margin: 8px 0; }
+
+.meta {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #f1f4ff;
+    border: 1px solid #dce3ff;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    white-space: pre;
+}
+
+.actions {
+    margin-top: 22px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    text-decoration: none;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary   { background: #1c62d3; color: #fff; }
+.btn-secondary { background: #e9eefc; color: #1c62d3; }
+.btn-primary:hover   { background: #1958bc; }
+.btn-secondary:hover { background: #d9e4fb; }
+
+.h1-error   { color: #b11414; }
+.h1-welcome { color: #0d4fb8; }
+.h1-news    { color: #1b1f2a; }
+
+ol, ul { line-height: 1.8; padding-left: 20px; }
